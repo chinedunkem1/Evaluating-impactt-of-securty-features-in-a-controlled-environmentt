@@ -1,5 +1,7 @@
--- Run this in MySQL Workbench before starting the app for the first time
--- This creates the database the app needs
+-- Run this in MySQL Workbench before starting either app for the first time
 
+-- secure version database
 CREATE DATABASE IF NOT EXISTS payroll_db;
-USE payroll_db;
+
+-- insecure version database (separate so they don't share data)
+CREATE DATABASE IF NOT EXISTS payroll_insecure_db;

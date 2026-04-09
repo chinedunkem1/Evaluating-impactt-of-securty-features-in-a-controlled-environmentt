@@ -37,3 +37,4 @@ payroll-backend/config.py
 # Logs
 *.log
 payroll-backend/config.py
+payroll-insecure/config.py
