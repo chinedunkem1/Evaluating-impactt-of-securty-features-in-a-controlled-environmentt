@@ -28,6 +28,9 @@ env/
 .DS_Store
 Thumbs.db
 
+# Local config (each person has their own - copy config.example.py to config.py and fill in your password)
+payroll-backend/config.py
+
 # MySQL dumps
 *.sql.bak
 
