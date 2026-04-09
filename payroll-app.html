@@ -8,7 +8,7 @@
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { font-family: Arial, sans-serif; background: #eeeeee; color: #222; font-size: 14px; }
 
-    /* LOGIN */
+    /* login page */
     .login-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #cccccc; }
     .login-box { background: #fff; border: 1px solid #aaa; padding: 30px; width: 320px; }
     .login-logo { display: flex; align-items: center; gap: 8px; margin-bottom: 20px; }
@@ -25,7 +25,7 @@
     .btn-login:hover { background: #254e7a; }
     .btn-login:disabled { background: #999; cursor: not-allowed; }
 
-    /* NAVBAR */
+    /* navbar */
     .navbar { background: #336699; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; height: 44px; display: none; }
     .navbar.visible { display: flex; }
     .navbar-left { display: flex; align-items: center; gap: 20px; }
@@ -41,7 +41,7 @@
     .logout-btn { padding: 5px 10px; font-size: 12px; cursor: pointer; border: 1px solid #ccc; background: #fff; color: #cc0000; font-family: Arial, sans-serif; }
     .logout-btn:hover { background: #ffeeee; }
 
-    /* APP LAYOUT */
+    /* app layout */
     .app { display: none; min-height: calc(100vh - 44px); }
     .app.visible { display: flex; }
     .sidebar { width: 180px; background: #fff; border-right: 1px solid #aaa; padding: 15px 10px; display: flex; flex-direction: column; gap: 2px; }
@@ -50,13 +50,13 @@
     .sidebar-item.active { background: #dce8f5; color: #336699; font-weight: bold; }
     .main { flex: 1; padding: 20px; overflow-y: auto; }
 
-    /* PAGES */
+    /* pages */
     .page { display: none; }
     .page.active { display: block; }
     .page-title { font-size: 17px; font-weight: bold; color: #336699; border-bottom: 2px solid #336699; padding-bottom: 6px; margin-bottom: 18px; }
     .page-subtitle { font-size: 12px; color: #666; margin-top: 3px; font-weight: normal; }
 
-    /* STAT CARDS */
+    /* stat cards at top of admin dashboard */
     .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
     .stat-card { border: 1px solid #aaa; padding: 14px; background: #fff; display: flex; flex-direction: column; gap: 4px; }
     .stat-card.blue  { border-top: 3px solid #336699; }
@@ -66,17 +66,17 @@
     .stat-label { font-size: 11px; color: #666; }
     .stat-value { font-size: 20px; font-weight: bold; color: #336699; }
 
-    /* CARDS */
+    /* cards */
     .card { background: #fff; border: 1px solid #aaa; padding: 15px; margin-bottom: 15px; }
     .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
     .card-title { font-size: 14px; font-weight: bold; color: #336699; }
 
-    /* EARNINGS */
+    /* earnings section */
     .earnings-hero { background: #fff; border: 1px solid #aaa; padding: 15px; margin-bottom: 15px; }
     .earnings-label { font-size: 12px; color: #666; margin-bottom: 4px; }
     .earnings-value { font-size: 26px; font-weight: bold; color: #336699; margin-bottom: 12px; }
 
-    /* BUTTONS */
+    /* buttons */
     .btn { display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; font-size: 13px; cursor: pointer; border: none; font-family: Arial, sans-serif; }
     .btn-primary { background: #336699; color: #fff; }
     .btn-primary:hover { background: #254e7a; }
@@ -88,10 +88,10 @@
     .download-btn { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; background: #336699; color: #fff; font-size: 12px; cursor: pointer; border: none; font-family: Arial, sans-serif; }
     .edit-btn { display: inline-flex; align-items: center; gap: 3px; padding: 4px 8px; background: #dce8f5; color: #336699; font-size: 12px; cursor: pointer; border: 1px solid #aac4e0; font-family: Arial, sans-serif; }
 
-    /* TWO COL */
+    /* two column layout */
     .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
 
-    /* TABLE */
+    /* tables */
     .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
     .data-table th { text-align: left; font-size: 12px; font-weight: bold; background: #336699; color: #fff; padding: 7px 10px; border: 1px solid #aaa; }
     .data-table td { padding: 7px 10px; border-bottom: 1px solid #ddd; }
@@ -99,14 +99,14 @@
     .data-table tr:hover td { background: #eef3f9; }
     .empty-row td { text-align: center; color: #999; padding: 20px; }
 
-    /* BADGES */
+    /* status badges */
     .badge { display: inline-block; padding: 2px 8px; font-size: 11px; font-weight: bold; border: 1px solid #aaa; }
     .badge-green { background: #e8f5e9; color: #2e7d32; border-color: #a5d6a7; }
     .badge-amber { background: #fff3e0; color: #e65100; border-color: #ffcc80; }
     .badge-blue  { background: #e3f2fd; color: #1565c0; border-color: #90caf9; }
     .badge-red   { background: #ffebee; color: #cc0000; border-color: #ef9a9a; }
 
-    /* SUMMARY ROWS */
+    /* summary rows e.g. on payslip cards */
     .summary-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; }
     .summary-row:last-child { border-bottom: none; }
     .summary-label { font-size: 13px; color: #666; }
@@ -114,11 +114,11 @@
     .summary-value.blue { color: #336699; }
     .summary-value.green { color: #2e7d32; }
 
-    /* ALERT */
+    /* alert box */
     .alert { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; margin-bottom: 14px; border: 1px solid #aaa; }
     .alert-info { background: #e8f0fb; border-color: #aac4e0; color: #1a3a6b; }
 
-    /* MODAL */
+    /* modals */
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; align-items: center; justify-content: center; }
     .modal-overlay.open { display: flex; }
     .modal { background: #fff; border: 1px solid #aaa; padding: 24px; width: 420px; }
@@ -129,12 +129,12 @@
     .tfa-input:focus { outline: none; border-color: #336699; }
     .tfa-error { color: #cc0000; font-size: 12px; margin-top: 6px; display: none; }
 
-    /* LOADING */
+    /* loading spinner */
     .loading { display: flex; align-items: center; justify-content: center; padding: 30px; color: #999; font-size: 13px; gap: 8px; }
     .spinner { width: 18px; height: 18px; border: 2px solid #ddd; border-top-color: #336699; border-radius: 50%; animation: spin 0.7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* MISC */
+    /* misc */
     .search-input { padding: 6px; border: 1px solid #aaa; font-size: 13px; font-family: Arial, sans-serif; width: 200px; }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
     .span-2 { grid-column: span 2; }
@@ -148,9 +148,7 @@
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     LOGIN PAGE
-══════════════════════════════════════ -->
+<!-- login page -->
 <div class="login-page" id="loginPage">
   <div class="login-box">
     <div class="login-logo">
@@ -174,9 +172,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     2FA MODAL
-══════════════════════════════════════ -->
+<!-- 2fa modal - only shows for admin login -->
 <div class="modal-overlay" id="tfaModal">
   <div class="modal">
     <div class="modal-title">🔐 Two-Factor Authentication</div>
@@ -190,9 +186,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     ADD EMPLOYEE MODAL
-══════════════════════════════════════ -->
+<!-- add employee modal -->
 <div class="modal-overlay" id="addEmpModal">
   <div class="modal" style="width:500px">
     <div class="modal-title">+ Add New Employee</div>
@@ -215,9 +209,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     EDIT EMPLOYEE MODAL
-══════════════════════════════════════ -->
+<!-- edit employee modal -->
 <div class="modal-overlay" id="editEmpModal">
   <div class="modal" style="width:500px">
     <div class="modal-title">Edit Employee</div>
@@ -247,9 +239,7 @@
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     NAVBAR
-══════════════════════════════════════ -->
+<!-- navbar -->
 <nav class="navbar" id="navbar">
   <div class="navbar-left">
     <div class="logo"><div class="logo-icon">PS</div> PaySecure</div>
@@ -264,9 +254,7 @@
   </div>
 </nav>
 
-<!-- ══════════════════════════════════════
-     APP SHELL
-══════════════════════════════════════ -->
+<!-- main app wrapper, hidden until logged in -->
 <div class="app" id="appShell">
 
   <!-- SIDEBAR (employee only) -->
@@ -278,7 +266,7 @@
 
   <div class="main" id="mainArea">
 
-    <!-- ════════ EMPLOYEE PAGES ════════ -->
+    <!-- employee pages -->
     <div id="emp-view" style="display:none;">
 
       <!-- Employee Dashboard -->
@@ -344,7 +332,7 @@
 
     </div><!-- /emp-view -->
 
-    <!-- ════════ ADMIN PAGES ════════ -->
+    <!-- admin pages -->
     <div id="adm-view" style="display:none;">
 
       <!-- Admin Dashboard -->
@@ -421,10 +409,29 @@
       <!-- Admin Users -->
       <div class="page" id="adm-users">
         <div class="page-title">User Accounts</div>
+
+        <div class="card" style="margin-bottom:15px;">
+          <div class="card-header"><span class="card-title">Create New Account</span></div>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Username</label><input class="form-input" id="newUserUsername" placeholder="e.g. kyle" /></div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="newUserEmail" type="email" placeholder="kyle@company.ie" /></div>
+            <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="newUserPassword" type="password" placeholder="min 6 characters" /></div>
+            <div class="form-group"><label class="form-label">Role</label>
+              <select class="form-input" id="newUserRole">
+                <option value="employee">Employee</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+          </div>
+          <div id="createUserMsg" style="font-size:12px;margin:8px 0;display:none;"></div>
+          <button class="btn btn-primary" onclick="submitCreateUser()">Create Account</button>
+        </div>
+
         <div class="card">
+          <div class="card-header"><span class="card-title">All Users</span></div>
           <table class="data-table">
-            <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Created</th></tr></thead>
-            <tbody id="admUsersTable"><tr><td colspan="4" class="loading"><div class="spinner"></div> Loading…</td></tr></tbody>
+            <thead><tr><th>Username</th><th>Email</th><th>Role</th><th>Created</th><th>Actions</th></tr></thead>
+            <tbody id="admUsersTable"><tr><td colspan="5" class="loading"><div class="spinner"></div> Loading…</td></tr></tbody>
           </table>
         </div>
       </div>
@@ -435,17 +442,12 @@
 </div><!-- /app -->
 
 <script>
-// ══════════════════════════════════════════
-//  STATE
-// ══════════════════════════════════════════
-let currentUser  = null;
+let currentUser = null;
 let allEmployees = [];
 
-const API = ''; // same origin — Flask serves this file
+const API = ''; // flask serves this file so same origin
 
-// ══════════════════════════════════════════
-//  HELPERS
-// ══════════════════════════════════════════
+// helper functions
 const fmt = (n) => '€ ' + Number(n).toLocaleString('en-IE', {minimumFractionDigits:2, maximumFractionDigits:2});
 const fmtShort = (n) => '€' + Math.round(n).toLocaleString('en-IE');
 
@@ -466,9 +468,7 @@ async function api(path, opts={}) {
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-// ══════════════════════════════════════════
-//  LOGIN
-// ══════════════════════════════════════════
+// login - press enter to submit
 document.getElementById('loginPassword').addEventListener('keyup', e => { if(e.key==='Enter') doLogin(); });
 
 async function doLogin() {
@@ -515,9 +515,7 @@ async function doLogin() {
   }
 }
 
-// ══════════════════════════════════════════
-//  2FA
-// ══════════════════════════════════════════
+// 2FA verification
 document.getElementById('tfaCode').addEventListener('keyup', e => { if(e.key==='Enter') doVerify2FA(); });
 
 async function doVerify2FA() {
@@ -548,9 +546,7 @@ function cancelTfa() {
   document.getElementById('loginBtn').textContent = 'Sign In';
 }
 
-// ══════════════════════════════════════════
-//  LOGOUT
-// ══════════════════════════════════════════
+// logout
 async function doLogout() {
   await api('/api/auth/logout', { method: 'POST' });
   currentUser = null;
@@ -565,9 +561,7 @@ async function doLogout() {
   document.getElementById('loginError').style.display = 'none';
 }
 
-// ══════════════════════════════════════════
-//  ENTER APP AFTER LOGIN
-// ══════════════════════════════════════════
+// called after successful login (or 2fa) to show the main app
 function enterApp() {
   // Hide login
   document.getElementById('loginPage').style.display = 'none';
@@ -586,9 +580,7 @@ function enterApp() {
   }
 }
 
-// ══════════════════════════════════════════
-//  EMPLOYEE VIEW
-// ══════════════════════════════════════════
+// ------- employee view -------
 function loadEmployeeView() {
   document.getElementById('empSidebar').style.display = 'flex';
   document.getElementById('emp-view').style.display = 'block';
@@ -679,9 +671,7 @@ async function loadProfile() {
   document.getElementById('profMonthly').textContent = fmt(e.salary / 12);
 }
 
-// ══════════════════════════════════════════
-//  ADMIN VIEW
-// ══════════════════════════════════════════
+// ------- admin view -------
 function loadAdminView() {
   document.getElementById('empSidebar').style.display = 'none';
   document.getElementById('adm-view').style.display = 'block';
@@ -779,6 +769,7 @@ async function loadAdminPayslips() {
     tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No payslips yet — generate them above</td></tr>';
     return;
   }
+  // only show first 20 for now, TODO add pagination maybe
   tbody.innerHTML = data.payslips.slice(0,20).map(p => `
     <tr>
       <td>Employee #${p.employee_id}</td>
@@ -839,7 +830,7 @@ async function loadUsers() {
   const data = await api('/api/admin/users');
   const tbody = document.getElementById('admUsersTable');
   if (!data.success || !data.users.length) {
-    tbody.innerHTML = '<tr class="empty-row"><td colspan="4">No users found</td></tr>';
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No users found</td></tr>';
     return;
   }
   tbody.innerHTML = data.users.map(u => `
@@ -848,12 +839,71 @@ async function loadUsers() {
       <td>${u.email}</td>
       <td>${badge(u.role)}</td>
       <td style="font-size:0.82rem;">${u.created_at}</td>
+      <td>
+        ${u.username !== currentUser.username ? `
+          <button class="edit-btn" onclick="toggleRole(${u.id}, '${u.role}')">
+            ${u.role === 'admin' ? 'Make Employee' : 'Make Admin'}
+          </button>` : '<span style="color:#999;font-size:12px;">you</span>'}
+      </td>
     </tr>`).join('');
 }
 
-// ══════════════════════════════════════════
-//  ADD EMPLOYEE
-// ══════════════════════════════════════════
+async function toggleRole(userId, currentRole) {
+  const newRole = currentRole === 'admin' ? 'employee' : 'admin';
+  const confirm = window.confirm(`Change this user to ${newRole}?`);
+  if (!confirm) return;
+
+  const data = await api(`/api/admin/users/${userId}/role`, {
+    method: 'PUT',
+    body: JSON.stringify({ role: newRole }),
+  });
+
+  if (data.success) {
+    loadUsers();
+  } else {
+    alert(data.message || 'Failed to update role');
+  }
+}
+
+async function submitCreateUser() {
+  const msgEl = document.getElementById('createUserMsg');
+  msgEl.style.display = 'none';
+
+  const body = {
+    username: document.getElementById('newUserUsername').value.trim(),
+    email:    document.getElementById('newUserEmail').value.trim(),
+    password: document.getElementById('newUserPassword').value,
+    role:     document.getElementById('newUserRole').value,
+  };
+
+  if (!body.username || !body.email || !body.password) {
+    msgEl.style.display = 'block';
+    msgEl.style.color = '#cc0000';
+    msgEl.textContent = 'Please fill in all fields.';
+    return;
+  }
+
+  const data = await api('/api/admin/users', {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+
+  msgEl.style.display = 'block';
+  if (data.success) {
+    msgEl.style.color = '#2e7d32';
+    msgEl.textContent = 'Account created successfully.';
+    document.getElementById('newUserUsername').value = '';
+    document.getElementById('newUserEmail').value = '';
+    document.getElementById('newUserPassword').value = '';
+    document.getElementById('newUserRole').value = 'employee';
+    loadUsers();
+  } else {
+    msgEl.style.color = '#cc0000';
+    msgEl.textContent = data.message || 'Failed to create user.';
+  }
+}
+
+// add employee form submit
 async function submitNewEmployee() {
   const errEl = document.getElementById('addEmpError');
   errEl.style.display = 'none';
@@ -881,9 +931,7 @@ async function submitNewEmployee() {
   loadAdminEmployees();
 }
 
-// ══════════════════════════════════════════
-//  NAV RENDER
-// ══════════════════════════════════════════
+// build the nav links dynamically based on role
 function renderNav(items) {
   const nl = document.getElementById('navLinks');
   nl.innerHTML = '';
@@ -900,9 +948,7 @@ function renderNav(items) {
   });
 }
 
-// ══════════════════════════════════════════
-//  EDIT EMPLOYEE
-// ══════════════════════════════════════════
+// edit employee - prefill the modal with the employee's current data
 function openEditModal(emp) {
   document.getElementById('editEmpId').value      = emp.id;
   document.getElementById('editFirstName').value  = emp.first_name;
@@ -912,13 +958,12 @@ function openEditModal(emp) {
   document.getElementById('editSalary').value     = emp.salary;
   document.getElementById('editEmpError').style.display = 'none';
 
-  // Set department dropdown
+  // set department dropdown - had to loop through options to match the value
   const deptSel = document.getElementById('editDept');
   for (let i = 0; i < deptSel.options.length; i++) {
     if (deptSel.options[i].value === emp.department) { deptSel.selectedIndex = i; break; }
   }
 
-  // Set status dropdown
   const statusSel = document.getElementById('editStatus');
   for (let i = 0; i < statusSel.options.length; i++) {
     if (statusSel.options[i].value === emp.status) { statusSel.selectedIndex = i; break; }
@@ -958,9 +1003,7 @@ async function submitEditEmployee() {
   loadAdminEmployees();
 }
 
-// ══════════════════════════════════════════
-//  CHECK SESSION ON LOAD
-// ══════════════════════════════════════════
+// check if user is already logged in when page loads (persists session on refresh)
 (async () => {
   try {
     const data = await api('/api/auth/me');
@@ -968,7 +1011,9 @@ async function submitEditEmployee() {
       currentUser = data;
       enterApp();
     }
-  } catch(e) {}
+  } catch(e) {
+    // not logged in, just show login page
+  }
 })();
 </script>
 </body>

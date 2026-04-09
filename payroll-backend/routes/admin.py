@@ -175,3 +175,54 @@ def list_users():
         'employee_id': u.employee_id,
         'created_at':  u.created_at.strftime('%Y-%m-%d %H:%M'),
     } for u in users]}), 200
+
+
+@admin_bp.route('/users/<int:user_id>/role', methods=['PUT'])
+@admin_required
+def update_user_role(user_id):
+    # don't let admin demote themselves
+    if user_id == current_user.id:
+        return jsonify({'success': False, 'message': "You can't change your own role"}), 400
+
+    user = User.query.get_or_404(user_id)
+    data = request.get_json()
+    new_role = data.get('role')
+
+    if new_role not in ('admin', 'employee'):
+        return jsonify({'success': False, 'message': 'Invalid role'}), 400
+
+    user.role = new_role
+    db.session.commit()
+    return jsonify({'success': True, 'message': f'Role updated to {new_role}'}), 200
+
+
+@admin_bp.route('/users', methods=['POST'])
+@admin_required
+def create_user():
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    email    = data.get('email', '').strip()
+    password = data.get('password', '')
+    role     = data.get('role', 'employee')
+
+    if not username or not email or not password:
+        return jsonify({'success': False, 'message': 'All fields are required'}), 400
+
+    if len(password) < 6:
+        return jsonify({'success': False, 'message': 'Password must be at least 6 characters'}), 400
+
+    if User.query.filter_by(username=username).first():
+        return jsonify({'success': False, 'message': 'Username already taken'}), 409
+
+    if User.query.filter_by(email=email).first():
+        return jsonify({'success': False, 'message': 'Email already in use'}), 409
+
+    if role not in ('admin', 'employee'):
+        role = 'employee'
+
+    user = User(username=username, email=email, role=role)
+    user.set_password(password)
+    db.session.add(user)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'User created', 'user_id': user.id}), 201
