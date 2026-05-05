@@ -1,3 +1,22 @@
+"""
+Admin routes - employee management, payslip generation, user management, security logs.
+
+Security measures:
+- admin_required decorator enforces authentication + admin role on every route (OWASP A01)
+- Input validation and type-checking on all write endpoints (OWASP A03)
+- Salary clamped to a sensible range - rejects negatives and obviously invalid values
+- Sensitive actions (create user, delete employee, role change) written to security_logs (OWASP A09)
+- Role values restricted to a fixed allow-list to prevent privilege escalation (OWASP A01)
+
+References:
+- OWASP A01:2021 Broken Access Control
+  https://owasp.org/Top10/A01_2021-Broken_Access_Control/
+- OWASP A09:2021 Security Logging and Monitoring Failures
+  https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/
+- OWASP Input Validation Cheat Sheet
+  https://cheatsheetseries.owasp.org/cheatsheets/Input_Validation_Cheat_Sheet.html
+"""
+
 from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 from functools import wraps
@@ -7,8 +26,28 @@ from datetime import date
 
 admin_bp = Blueprint('admin', __name__, url_prefix='/api/admin')
 
+ALLOWED_ROLES    = {'admin', 'employee'}
+ALLOWED_STATUSES = {'Active', 'On Leave', 'Inactive'}
+SALARY_MIN       = 1_000      # sanity floor  - nothing below €1k/year
+SALARY_MAX       = 1_000_000  # sanity ceiling - nothing above €1M/year
+
+
+def log_admin_event(event_type, payload=None):
+    """Write a security/audit event triggered by an admin action."""
+    entry = SecurityLog(
+        event_type=event_type,
+        ip_address=request.remote_addr,
+        user_agent=request.headers.get('User-Agent', '')[:300],
+        endpoint=request.path,
+        payload=str(payload)[:500] if payload else None,
+        username=current_user.username,
+    )
+    db.session.add(entry)
+    # caller is responsible for commit (so we don't issue an extra round-trip)
+
 
 # decorator to block non-admins
+# Reference: OWASP A01:2021 Broken Access Control
 def admin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -55,8 +94,27 @@ def add_employee():
         if not data.get(field):
             return jsonify({'success': False, 'message': f'Missing field: {field}'}), 400
 
+    # validate salary is a number in a sensible range
+    # Reference: OWASP Input Validation Cheat Sheet
+    try:
+        salary = float(data['salary'])
+    except (ValueError, TypeError):
+        return jsonify({'success': False, 'message': 'Salary must be a number'}), 400
+    if not (SALARY_MIN <= salary <= SALARY_MAX):
+        return jsonify({'success': False, 'message': f'Salary must be between {SALARY_MIN} and {SALARY_MAX}'}), 400
+
+    # reject unknown status values
+    status = data.get('status', 'Active')
+    if status not in ALLOWED_STATUSES:
+        return jsonify({'success': False, 'message': 'Invalid status value'}), 400
+
     if Employee.query.filter_by(email=data['email']).first():
         return jsonify({'success': False, 'message': 'Email already in use'}), 409
+
+    try:
+        start = date.fromisoformat(data['start_date']) if data.get('start_date') else date.today()
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Invalid start_date format (use YYYY-MM-DD)'}), 400
 
     emp = Employee(
         first_name=data['first_name'],
@@ -64,13 +122,15 @@ def add_employee():
         email=data['email'],
         department=data['department'],
         job_title=data['job_title'],
-        salary=float(data['salary']),
-        status=data.get('status', 'Active'),
-        start_date=date.fromisoformat(data['start_date']) if data.get('start_date') else date.today(),
+        salary=salary,
+        status=status,
+        start_date=start,
         iban=data.get('iban'),
         pps_number=data.get('pps_number'),
     )
     db.session.add(emp)
+    # log the action for audit trail
+    log_admin_event('admin_add_employee', {'email': emp.email, 'department': emp.department})
     db.session.commit()
 
     return jsonify({'success': True, 'message': 'Employee added', 'employee': emp.to_dict()}), 201
@@ -82,12 +142,25 @@ def update_employee(emp_id):
     emp  = Employee.query.get_or_404(emp_id)
     data = request.get_json()
 
+    # validate salary if provided
+    if 'salary' in data:
+        try:
+            salary = float(data['salary'])
+        except (ValueError, TypeError):
+            return jsonify({'success': False, 'message': 'Salary must be a number'}), 400
+        if not (SALARY_MIN <= salary <= SALARY_MAX):
+            return jsonify({'success': False, 'message': f'Salary must be between {SALARY_MIN} and {SALARY_MAX}'}), 400
+        emp.salary = salary
+
+    # reject unknown status values
+    if 'status' in data and data['status'] not in ALLOWED_STATUSES:
+        return jsonify({'success': False, 'message': 'Invalid status value'}), 400
+
     emp.first_name = data.get('first_name', emp.first_name)
     emp.last_name  = data.get('last_name',  emp.last_name)
     emp.email      = data.get('email',      emp.email)
     emp.department = data.get('department', emp.department)
     emp.job_title  = data.get('job_title',  emp.job_title)
-    emp.salary     = float(data.get('salary', emp.salary))
     emp.status     = data.get('status',     emp.status)
 
     db.session.commit()
@@ -98,6 +171,8 @@ def update_employee(emp_id):
 @admin_required
 def delete_employee(emp_id):
     emp = Employee.query.get_or_404(emp_id)
+    # log before delete so we still have the name
+    log_admin_event('admin_delete_employee', {'employee_id': emp_id, 'name': emp.full_name})
     db.session.delete(emp)
     db.session.commit()
     return jsonify({'success': True, 'message': 'Employee deleted'}), 200
@@ -188,10 +263,12 @@ def update_user_role(user_id):
     data = request.get_json()
     new_role = data.get('role')
 
-    if new_role not in ('admin', 'employee'):
+    if new_role not in ALLOWED_ROLES:
         return jsonify({'success': False, 'message': 'Invalid role'}), 400
 
+    old_role  = user.role
     user.role = new_role
+    log_admin_event('admin_role_change', {'user_id': user_id, 'username': user.username, 'old_role': old_role, 'new_role': new_role})
     db.session.commit()
     return jsonify({'success': True, 'message': f'Role updated to {new_role}'}), 200
 
@@ -208,8 +285,10 @@ def create_user():
     if not username or not email or not password:
         return jsonify({'success': False, 'message': 'All fields are required'}), 400
 
-    if len(password) < 6:
-        return jsonify({'success': False, 'message': 'Password must be at least 6 characters'}), 400
+    # minimum 8 chars - matches the rule in auth.py /register
+    # Reference: OWASP Authentication Cheat Sheet - Password Strength
+    if len(password) < 8:
+        return jsonify({'success': False, 'message': 'Password must be at least 8 characters'}), 400
 
     if User.query.filter_by(username=username).first():
         return jsonify({'success': False, 'message': 'Username already taken'}), 409
@@ -217,12 +296,13 @@ def create_user():
     if User.query.filter_by(email=email).first():
         return jsonify({'success': False, 'message': 'Email already in use'}), 409
 
-    if role not in ('admin', 'employee'):
+    if role not in ALLOWED_ROLES:
         role = 'employee'
 
     user = User(username=username, email=email, role=role)
     user.set_password(password)
     db.session.add(user)
+    log_admin_event('admin_create_user', {'username': username, 'role': role})
     db.session.commit()
 
     return jsonify({'success': True, 'message': 'User created', 'user_id': user.id}), 201

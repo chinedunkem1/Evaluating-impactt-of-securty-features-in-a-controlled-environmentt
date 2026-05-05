@@ -1,14 +1,36 @@
+"""
+PaySecure - Secure Payroll Application
+Main Flask application factory
+
+Security features implemented here:
+- WAF middleware (A03 Injection)
+- Security response headers (A05 Security Misconfiguration)
+- Honeypot routes (A09 Logging & Monitoring)
+- CORS restricted to same origin (A05)
+
+References:
+- OWASP Top 10 2021: https://owasp.org/Top10/
+- OWASP Secure Headers Project: https://owasp.org/www-project-secure-headers/
+- OWASP A05:2021 Security Misconfiguration
+  https://owasp.org/Top10/A05_2021-Security_Misconfiguration/
+"""
+
 from flask import Flask, jsonify, request, send_from_directory
 from flask_login import current_user
 from config import Config
 from extensions import db, login_manager
 from models import User, SecurityLog
+from waf import register_waf
 import os
 
 
-def create_app():
+def create_app(test_config=None):
     app = Flask(__name__, static_folder='../static', template_folder='../templates')
     app.config.from_object(Config)
+
+    # allow test suite to override config (e.g. swap MySQL for in-memory SQLite)
+    if test_config:
+        app.config.update(test_config)
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -22,6 +44,11 @@ def create_app():
     def unauthorized():
         return jsonify({'success': False, 'message': 'Login required'}), 401
 
+    # register WAF - must be before blueprints so it runs first
+    # Reference: OWASP A03:2021 Injection
+    # https://owasp.org/Top10/A03_2021-Injection/
+    register_waf(app)
+
     # register blueprints
     from routes.auth import auth_bp
     from routes.employee import employee_bp
@@ -31,8 +58,10 @@ def create_app():
     app.register_blueprint(employee_bp)
     app.register_blueprint(admin_bp)
 
-    # honeypot route - looks like a real admin panel to attract bots/scanners
-    # any hits here get logged to the security_logs table
+    # honeypot route
+    # looks like a real admin panel to attract bots/attackers scanning the site
+    # Reference: OWASP A09:2021 Security Logging and Monitoring Failures
+    # https://owasp.org/Top10/A09_2021-Security_Logging_and_Monitoring_Failures/
     @app.route('/admin-panel', methods=['GET', 'POST'])
     def honeypot():
         entry = SecurityLog(
@@ -45,20 +74,18 @@ def create_app():
         db.session.add(entry)
         db.session.commit()
 
-        # if someone submits the fake form, log what they tried
         if request.method == 'POST':
             entry2 = SecurityLog(
                 event_type='honeypot_submit',
                 ip_address=request.remote_addr,
                 user_agent=request.headers.get('User-Agent', '')[:300],
                 endpoint=request.path,
-                payload=str(request.get_json() or request.form.to_dict())[:500],
+                payload=str(request.get_json(silent=True) or request.form.to_dict())[:500],
             )
             db.session.add(entry2)
             db.session.commit()
             return jsonify({'error': 'Invalid credentials'}), 403
 
-        # fake login page to keep the attacker busy
         return '''
         <!DOCTYPE html><html><head><title>Admin Panel</title></head>
         <body style="font-family:sans-serif;display:flex;justify-content:center;padding:80px;">
@@ -75,12 +102,12 @@ def create_app():
         </body></html>
         ''', 200
 
-    # also catch common paths that bots scan for
-    @app.route('/wp-admin', defaults={'path': ''})
-    @app.route('/wp-login.php', defaults={'path': ''})
-    @app.route('/.env', defaults={'path': ''})
-    @app.route('/phpmyadmin', defaults={'path': ''})
-    def honeypot_scanner(path=''):
+    # catch common paths that automated scanners probe for
+    @app.route('/wp-admin')
+    @app.route('/wp-login.php')
+    @app.route('/.env')
+    @app.route('/phpmyadmin')
+    def honeypot_scanner():
         entry = SecurityLog(
             event_type='honeypot_scan',
             ip_address=request.remote_addr,
@@ -100,15 +127,61 @@ def create_app():
             return send_from_directory(os.path.dirname(frontend), 'payroll-app.html')
         return jsonify({'message': 'PaySecure API is running'}), 200
 
-    # CORS headers for local dev
     @app.after_request
-    def add_cors(response):
+    def add_security_headers(response):
+        """
+        Add HTTP security headers to every response.
+        Reference: OWASP Secure Headers Project
+        https://owasp.org/www-project-secure-headers/
+        Reference: OWASP A05:2021 Security Misconfiguration
+        https://owasp.org/Top10/A05_2021-Security_Misconfiguration/
+        """
+
+        # prevent the browser from rendering this page inside a frame/iframe
+        # protects against clickjacking attacks
+        # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Frame-Options
+        response.headers['X-Frame-Options'] = 'DENY'
+
+        # prevent browsers from MIME-sniffing a response away from the declared content-type
+        # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-Content-Type-Options
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+
+        # enable browser's built-in XSS filter (older browsers)
+        # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/X-XSS-Protection
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+
+        # control how much referrer info is sent with requests
+        # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+
+        # restrict access to browser features
+        response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+
+        # Content Security Policy - restricts where scripts/styles/etc can be loaded from
+        # 'unsafe-inline' needed because our frontend uses inline JS - in production
+        # you would move to external JS files and remove this
+        # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; "
+            "connect-src 'self';"
+        )
+
+        # HSTS - tell browsers to only connect over HTTPS
+        # (only takes effect when served over HTTPS, but good practice)
+        # Reference: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Strict-Transport-Security
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+
+        # handle CORS for local development
         origin = request.headers.get('Origin', '')
         if origin in ('http://localhost:5000', 'http://127.0.0.1:5000', 'http://localhost:5500'):
-            response.headers['Access-Control-Allow-Origin'] = origin
+            response.headers['Access-Control-Allow-Origin']      = origin
             response.headers['Access-Control-Allow-Credentials'] = 'true'
-            response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
-            response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+            response.headers['Access-Control-Allow-Headers']     = 'Content-Type'
+            response.headers['Access-Control-Allow-Methods']     = 'GET, POST, PUT, DELETE, OPTIONS'
+
         return response
 
     @app.route('/api/auth/login', methods=['OPTIONS'])
@@ -125,8 +198,25 @@ def create_app():
     return app
 
 
-# create tables and seed demo data on first run
+def upgrade_db(app):
+    """
+    Add new columns to existing tables without dropping the database.
+    Safe to run multiple times - ignores errors if columns already exist.
+    """
+    with app.app_context():
+        for sql in [
+            "ALTER TABLE users ADD COLUMN failed_attempts INT DEFAULT 0",
+            "ALTER TABLE users ADD COLUMN locked_until DATETIME NULL",
+        ]:
+            try:
+                db.session.execute(db.text(sql))
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+
+
 def seed_db(app):
+    """Create tables and seed demo data on first run."""
     with app.app_context():
         db.create_all()
 
@@ -182,5 +272,6 @@ def seed_db(app):
 
 if __name__ == '__main__':
     app = create_app()
+    upgrade_db(app)   # add new columns to existing DB safely
     seed_db(app)
     app.run(debug=True, host='0.0.0.0', port=5000)

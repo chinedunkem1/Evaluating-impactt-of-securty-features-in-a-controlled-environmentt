@@ -14,6 +14,12 @@ class User(UserMixin, db.Model):
     role          = db.Column(db.String(20),  nullable=False, default='employee')
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
 
+    # account lockout fields
+    # Reference: OWASP Authentication Cheat Sheet - Account Lockout
+    # https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+    failed_attempts = db.Column(db.Integer, default=0)
+    locked_until    = db.Column(db.DateTime, nullable=True)
+
     # linked employee record (admin accounts won't have one)
     employee_id = db.Column(db.Integer, db.ForeignKey('employees.id'), nullable=True)
     employee    = db.relationship('Employee', backref='user', uselist=False)
@@ -26,6 +32,11 @@ class User(UserMixin, db.Model):
 
     def is_admin(self):
         return self.role == 'admin'
+
+    def is_locked(self):
+        if self.locked_until and self.locked_until > datetime.utcnow():
+            return True
+        return False
 
     def __repr__(self):
         return f'<User {self.username} [{self.role}]>'
